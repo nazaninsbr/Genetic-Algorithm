@@ -1,3 +1,5 @@
+import random 
+
 def convertListToInt(li):
 	newli = []
 	for x in li:
@@ -46,6 +48,34 @@ class Students:
 	#def calSadness():
 
 
+#Chromosome
+class Schedule:
+	def __init__(self, days, timeSlots, courses=[]):
+		self.plan = []
+		self.makeEmptyPlan(days, timeSlots)
+		self.createPlan(courses)
+		self.printPlan()
+
+	def makeEmptyPlan(self, days, timeSlots):
+		line = []
+		for _ in range(timeSlots):
+			line.append(-1)
+		for _ in range(days):
+			self.plan.append(line)
+
+	def createPlan(self, courses=[]):
+		print("I'm in creatPlan")
+		for day in range(len(self.plan)):
+			for timeSlot in range(len(self.plan)):
+				if len(courses)==0:
+					return 
+				if self.plan[day][timeSlot]==-1:
+					index = (random.random())%(len(courses))
+					self.plan[day][timeSlot] = courses[index]
+					del courses[index]
+
+	def printPlan(self):
+		print("Plan: {}".format(self.plan))
 
 
 
@@ -66,7 +96,8 @@ class University:
 	def __init__(self):
 		#list of course and prof
 		self.profs = []
-		self.courses = []
+		self.courses_by_profs = []
+		self.all_courses = []
 		self.sadness = []
 		# c
 		self.NUMBER_OF_COURSES = 0 
@@ -81,7 +112,7 @@ class University:
 
 	def printInfo(self):
 		print("Professors: {}".format(self.profs))
-		print("Courses: {}".format(self.courses))
+		print("Courses: {}".format(self.courses_by_profs))
 		print("Sadness: {}".format(self.sadness))
 
 
@@ -96,13 +127,23 @@ class University:
 			numOFCourses = profCourses[0]
 			del profCourses[0]
 			self.profs.append(Professor(numP, numOFCourses,profCourses))
-			self.courses.append(profCourses)
+			self.courses_by_profs.append(profCourses)
 		for i in range(self.NUMBER_OF_COURSES):
 			sadnessLine = input().split()
 			sadnessLine = convertListToInt(sadnessLine)
 			self.sadness.append(sadnessLine)
 
 
+	def makeAllCourses(self):		
+		for profCourse in self.courses_by_profs:
+			if len(profCourse)>1:
+				for course in profCourse:
+					self.all_courses.append(course)
+			else:
+				self.all_courses.append(profCourse[0])
+
+	def makePlans(self):
+		sch = Schedule(self.DAY_SLOT, self.TIME_SLOT, self.all_courses)
 
 
 
@@ -117,6 +158,7 @@ def mainFunc():
 	uni = University()
 	uni.readInput()
 	uni.printInfo()
+	uni.makePlans()
 
 if __name__ == '__main__':
 	mainFunc()
