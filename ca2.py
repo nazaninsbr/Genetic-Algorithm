@@ -52,27 +52,29 @@ class Students:
 class Schedule:
 	def __init__(self, days, timeSlots, courses=[]):
 		self.plan = []
-		self.makeEmptyPlan(days, timeSlots)
-		self.createPlan(courses)
+		self.days = days
+		self.timeSlots = timeSlots
+		self.courses = courses
+		self.makeEmptyPlan()
+		self.createPlan()
 		self.printPlan()
 
-	def makeEmptyPlan(self, days, timeSlots):
-		line = []
-		for _ in range(timeSlots):
-			line.append(-1)
-		for _ in range(days):
+	def makeEmptyPlan(self):		
+		for _ in range(self.days):
+			line = []
+			for _ in range(self.timeSlots):
+				line.append(-1)
 			self.plan.append(line)
 
-	def createPlan(self, courses=[]):
-		print("I'm in creatPlan")
-		for day in range(len(self.plan)):
-			for timeSlot in range(len(self.plan)):
-				if len(courses)==0:
+	def createPlan(self):
+		for day_ in range(len(self.plan)):
+			for timeSlot_ in range(len(self.plan[0])):
+				if len(self.courses)==0:
 					return 
-				if self.plan[day][timeSlot]==-1:
-					index = (random.random())%(len(courses))
-					self.plan[day][timeSlot] = courses[index]
-					del courses[index]
+				if self.plan[day_][timeSlot_]==-1:
+					index = int(int((random.random()))%(len(self.courses)))
+					self.plan[day_][timeSlot_] = self.courses[index]
+					del self.courses[index]
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
@@ -133,6 +135,7 @@ class University:
 			sadnessLine = convertListToInt(sadnessLine)
 			self.sadness.append(sadnessLine)
 
+		self.makeAllCourses()
 
 	def makeAllCourses(self):		
 		for profCourse in self.courses_by_profs:
