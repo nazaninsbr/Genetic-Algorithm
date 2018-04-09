@@ -1,7 +1,5 @@
 import random 
 
-NUMBER_OF_SCHEDULES = 10
-
 def convertListToInt(li):
 	newli = []
 	for x in li:
@@ -9,14 +7,57 @@ def convertListToInt(li):
 	return newli
 
 
+class Course:
+	def __init__(self , value):
+		self.course_id = -1
+		self.time = -1
+		self.day = -1
+		# for course number i ci is value of happiness
+		self.happiness_value = value
+		self.offer = False
+		self.conflictCourses = []
+		self.has_conflict = False
+
+	# def conflict(self , Course course):
+	# 	conflict_course = list()
+	# 	if self.time == course.time and self.day == course.day:
+	# 		self.conflictCourses.append(course.course_id)
+	# 		course.has_conflict = 0
+	# 		self.has_conflict = 0
+
+
+class Students:
+	def __init__(self):
+		# ci 
+		self.hapiness = []
+		# k i j 
+		self.sadness = []
+		self.ownCourse = []
+	
+	def readHappiness():
+		
+		self.hapiness.append(valueofHappiness)
+
+	# def calHappiness(self , Course courses =[]):
+	# 	totalValue = 0
+	# 	for i in range (0 , len(courses)):
+	# 		if courses[i].offer != 1 :
+	# 			totalValue += courses[i].happiness_value
+	# 	return totalValue
+	
+	#def calSadness():
+
+
+#Chromosome
 class Schedule:
 	def __init__(self, days, timeSlots, courses=[]):
 		self.plan = []
 		self.days = days
 		self.timeSlots = timeSlots
-		self.courses = courses[:]
+		self.courses = courses
 		self.makeEmptyPlan()
 		self.createPlan()
+		self.printPlan()
 
 	def makeEmptyPlan(self):		
 		for _ in range(self.days):
@@ -31,7 +72,7 @@ class Schedule:
 				if len(self.courses)==0:
 					return 
 				if self.plan[day_][timeSlot_]==-1:
-					index = int((random.random())*100)%(len(self.courses))
+					index = int(int((random.random()))%(len(self.courses)))
 					self.plan[day_][timeSlot_] = self.courses[index]
 					del self.courses[index]
 
@@ -39,24 +80,8 @@ class Schedule:
 		print("Plan: {}".format(self.plan))
 
 
-class AllSchedules:
-	def __init__(self, count, days, timeSlots, courses=[]):
-		self.count = count
-		self.schedules = []
-		self.days = days
-		self.timeSlots = timeSlots
-		self.courses = courses
-
-	def createSchedules(self):
-		for i in range(self.count):
-			sch = Schedule(self.days, self.timeSlots, self.courses)
-			self.schedules.append(sch)
 
 
-	def printInfo(self):
-		print("All Plans:")
-		for i in range(self.count):
-			self.schedules[i].printPlan()
 
 class Professor:
 	def __init__(self, prof_id, number_of_courses, my_courses=[]):
@@ -76,7 +101,6 @@ class University:
 		self.courses_by_profs = []
 		self.all_courses = []
 		self.sadness = []
-		self.valueofHappiness = []
 		# c
 		self.NUMBER_OF_COURSES = 0 
 		# p 
@@ -85,8 +109,7 @@ class University:
 		self.TIME_SLOT = 0
 		# d
 		self.DAY_SLOT = 0
-
-		self.schedules = ""
+		self.students = []
 		
 
 	def printInfo(self):
@@ -98,7 +121,7 @@ class University:
 	def readInput(self):	
 		self.DAY_SLOT, self.TIME_SLOT = map(int, input().split())
 		self.NUMBER_OF_COURSES = int(input())
-		self.valueofHappiness = input().split()
+		valueofHappiness = input().split()
 		self.NUMBER_OF_PROFS = int(input())
 		for numP in range(self.NUMBER_OF_PROFS):
 			profCourses = input().split()
@@ -122,10 +145,8 @@ class University:
 			else:
 				self.all_courses.append(profCourse[0])
 
-	def createPopulation(self):
-		self.schedules = AllSchedules(NUMBER_OF_SCHEDULES , self.DAY_SLOT, self.TIME_SLOT, self.all_courses)
-		self.schedules.createSchedules()
-		self.schedules.printInfo()
+	def makePlans(self):
+		sch = Schedule(self.DAY_SLOT, self.TIME_SLOT, self.all_courses)
 
 
 
@@ -139,7 +160,8 @@ def test2():
 def mainFunc():
 	uni = University()
 	uni.readInput()
-	uni.createPopulation()
+	uni.printInfo()
+	uni.makePlans()
 
 if __name__ == '__main__':
 	mainFunc()
