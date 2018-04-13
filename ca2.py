@@ -7,7 +7,7 @@ def convertListToInt(li):
 	for x in li:
 		newli.append(int(x))
 	return newli
-
+	
 
 class Schedule:
 	def __init__(self, days, timeSlots, courses=[]):
@@ -22,18 +22,30 @@ class Schedule:
 		for _ in range(self.days):
 			line = []
 			for _ in range(self.timeSlots):
-				line.append(-1)
+				line.append([-1])
 			self.plan.append(line)
 
-	def createPlan(self):
+	def PlaceInFirstEmptySpace(self, index):
 		for day_ in range(len(self.plan)):
 			for timeSlot_ in range(len(self.plan[0])):
-				if len(self.courses)==0:
-					return 
-				if self.plan[day_][timeSlot_]==-1:
-					index = int((random.random())*100)%(len(self.courses))
-					self.plan[day_][timeSlot_] = self.courses[index]
-					del self.courses[index]
+				if self.plan[day_][timeSlot_]==[-1]:
+					self.plan[day_][timeSlot_][0] = self.courses[index]
+					return 1
+		return -1
+
+	# def putInFirtPossiblePlace(self, index):
+	# 	for day_ in range(len(self.plan)):
+	# 		for timeSlot_ in range(len(self.plan[0])):
+	# 			if weHaveSameProf2Class()==False:
+
+	def createPlan(self):
+		while len(self.courses)>0:
+			index = int((random.random())*100)%(len(self.courses))
+			emptySpace = self.PlaceInFirstEmptySpace(index)
+			if emptySpace==-1:
+				emptySpace = self.putInFirtPossiblePlace(index)
+			del self.courses[index]
+
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
