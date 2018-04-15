@@ -79,6 +79,9 @@ class Schedule:
 				print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester") 
 			del self.courses[index]
 
+	def fitness(self ,happiness = [] , sadness = []):
+		pass
+
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
 
