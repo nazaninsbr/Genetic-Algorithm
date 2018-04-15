@@ -117,7 +117,8 @@ class AllSchedules:
 
 
 	def Calcfitness(self, plan):
-		return plan.fitness(self.happiness, self.sadness)
+		#return plan.fitness(self.happiness, self.sadness)
+		return -1
 
 
 	def swapSchedules(self, plan1index, plan2index):
@@ -127,14 +128,25 @@ class AllSchedules:
 
 
 	def sortSchedulesList(self):		
-		for plan1index in len(schedules):
+		for plan1index in range(len(self.schedules)):
 			for plan2index in range(0, plan1index):
-				if Calcfitness(self.schedules[plan1index]) < Calcfitness(self.schedules[plan2index]):
+				if self.Calcfitness(self.schedules[plan1index]) < self.Calcfitness(self.schedules[plan2index]):
 					self.swapSchedules(plan1index, plan2index)
 
+	def crossOver(self):
+		pass
+
+	def mutation(self):
+		pass
+
+
 	def reachBestSchedule(self):
-		while Calcfitness(self.schedules[0])<0:
+		while self.Calcfitness(self.schedules[0]) <0:
 			self.sortSchedulesList()
+			self.crossOver()
+			if int(random.random()*100)%50 == 1:
+				self.mutation()
+			self.printInfo()
 		
 
 
