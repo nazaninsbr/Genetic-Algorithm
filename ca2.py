@@ -1,6 +1,6 @@
 import random 
 
-NUMBER_OF_SCHEDULES = 10
+NUMBER_OF_SCHEDULES = 20
 
 def convertListToInt(li):
 	newli = []
@@ -57,7 +57,7 @@ class Schedule:
 			day_ = int((random.random())*100)%(self.days)
 			timeSlot_ = int((random.random())*100)%(self.timeSlots)
 			if hasConflict(index, self.courses[day_][timeSlot_])==False:
-				self.courses[day_][timeSlot_].append(self.courses[index].getCourseId())
+				self.plan[day_][timeSlot_].append(self.courses[index].getCourseId())
 				return 1
 			try_times +=1
 
@@ -84,7 +84,9 @@ class Schedule:
 
 
 class AllSchedules:
-	def __init__(self, count, days, timeSlots, courses=[]):
+	def __init__(self, count, days, timeSlots, courses=[], happiness=[], sadness=[]):
+		self.happiness = happiness
+		self.sadness = sadness
 		self.count = count
 		self.schedules = []
 		self.days = days
@@ -95,6 +97,29 @@ class AllSchedules:
 		for i in range(self.count):
 			sch = Schedule(self.days, self.timeSlots, self.courses)
 			self.schedules.append(sch)
+
+
+	def Calcfitness(self, plan):
+		return plan.fitness(self.happiness, self.sadness)
+
+
+	def swapSchedules(self, plan1index, plan2index):
+		temp = self.schedules[plan1index]
+		self.schedules[plan1index] = self.schedules[plan2index]
+		self.schedules[plan2index] = temp
+
+
+	def sortSchedulesList(self):		
+		for plan1index in len(schedules):
+			for plan2index in range(0, plan1index):
+				if Calcfitness(self.schedules[plan1index]) < Calcfitness(self.schedules[plan2index]):
+					self.swapSchedules(plan1index, plan2index)
+
+	def reachBestSchedule(self):
+		while Calcfitness(self.schedules[0])<0:
+			self.sortSchedulesList()
+		
+
 
 
 	def printInfo(self):
@@ -169,9 +194,9 @@ class University:
 				self.all_courses.append(Course(profCourse[0], profID))
 
 	def createPopulation(self):
-		self.schedules = AllSchedules(NUMBER_OF_SCHEDULES , self.DAY_SLOT, self.TIME_SLOT, self.all_courses)
+		self.schedules = AllSchedules(NUMBER_OF_SCHEDULES , self.DAY_SLOT, self.TIME_SLOT, self.all_courses, self.valueofHappiness, self.sadness)
 		self.schedules.createSchedules()
-		self.schedules.printInfo()
+		self.schedules.reachBestSchedule()
 
 
 
