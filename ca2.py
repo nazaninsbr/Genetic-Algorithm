@@ -97,24 +97,36 @@ class Schedule:
 		for d in self.plan:
 			for t in d:
 				for nc in t:
-					self.sumHappiness += int(happiness[nc.getCourseId()-1])
-					for nr in t:
-						if nr.getCourseId() != nc.getCourseId():
-							self.sumSadness += int(sadness[nc.getCourseId()-1][nr.getCourseId()-1])
+					if nc != -1:
+						self.sumHappiness += int(happiness[nc.getCourseId()-1])
+						for nr in t:
+							if nr != -1:
+								if nr.getCourseId() != nc.getCourseId():
+									self.sumSadness += int(sadness[nc.getCourseId()-1][nr.getCourseId()-1])
 		totalFitness = self.sumHappiness - self.sumSadness 
 		return totalFitness
 
-	def printOutput():
-		for i in range(0 , len(plan)):
-			for j in range(i , len(plan)):
-				for k in range(0 , len(self.courses)):
-					print("[" + self.plan[i][j].courses[k].getCourseId() + "]" + "[" + self.plan[i][j].courses[k].getProf() + "]" + "[" + self.plan[i][j].getDayAndTime()+"]")
+	def printOutput(self):
+		print("Format:[time slot] [day] [professor ID] [course ID]")
+		for day in range(len(self.plan)):
+			for time in range(len(self.plan[day])):
+				for course in range(len(self.plan[day][time])):
+					if self.plan[day][time][course] != -1:
+						print("["+str(time+1)+"]"+"["+ str(day+1) + "]" + "[" + str(self.plan[day][time][course].getProf())+"]"+"[" + str(self.plan[day][time][course].getCourseId())+"]")
 
 	def printPlan(self):
-		print("Plan: {}".format(self.plan))
+		printedPlan = []
+		for day in self.plan:
+			printedPlan.append([])
+			for time in day:
+				printedPlan[-1].append([])
+				for course in time:
+					if course != -1:
+						printedPlan[-1][-1].append(course.getCourseId())
+					else:
+						printedPlan[-1][-1].append(-1)
+		print("Plan:"+str(printedPlan))
 
-	def printOutput(self):
-		self.printPlan()
 
 	def getPlan(self):
 		return self.plan
@@ -125,9 +137,25 @@ class Schedule:
 	def setPlan(self, plan):
 		self.plan = plan
 
+
+	def FixDuplicate(self, changedDay, changedTime):
+		for day in range(len(self.plan)):
+			for time in range(len(self.plan[day])):
+				if day == changedDay and time == changedTime:
+					continue 
+				for course in range(len(self.plan[day][time])):
+					if self.plan[day][time][course] != -1:
+						for item in self.plan[changedDay][changedTime]:
+							if item != -1:
+								if self.plan[day][time][course].getCourseId() == item.getCourseId():
+									del self.plan[day][time][course]
+
+
+
 	def changedDateAndTime(self, value, day, time):
 		temp = self.plan[day][time]
 		self.plan[day][time] = value 
+		self.FixDuplicate(day, time)
 
 
 class AllSchedules:
@@ -163,19 +191,20 @@ class AllSchedules:
 					self.swapSchedules(plan1index, plan2index)
 
 	def createNewPlan(self, plan, changedValue, day, time):
-		newPlan = Schedule(self.days, self.timeSlots, self.courses)
+		newPlan = Schedule(self.days, self.timeSlots, [])
 		newPlan.setPlan(plan)
 		newPlan.changedDateAndTime(changedValue, day, time)
 		self.schedules.append(newPlan)
 
 	def crossOver(self):
 		#print("here")
-		for plan1 in self.schedules:
-			if int(random.random()*100)%10 == 1 and len(self.schedules)>4:
+		oldGeneration = self.schedules[:]
+		for plan1 in oldGeneration:
+			if int(random.random()*100)%10 == 1 and len(oldGeneration)>4:
 				plan2index = int(random.random()*100)%4
 				#print(plan2index)
 			else:
-				plan2index = int(random.random()*100)%(len(self.schedules))
+				plan2index = int(random.random()*100)%(len(oldGeneration))
 				#print(plan2index)
 
 			dayRand1 = int(random.random()*100)%self.days
@@ -188,12 +217,14 @@ class AllSchedules:
 			self.createNewPlan(plan1.getPlan(), dayAndTime1, dayRand1, timeRand1)
 			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime2, dayRand2, timeRand2)
 
+		print(len(self.schedules))
+
 	def mutation(self):
 		return 0
 
 
 	def trimPopulation(self):
-		while len(self.schedules)>100:
+		while len(self.schedules)>200:
 			del self.schedules[-1]
 
 
@@ -201,13 +232,12 @@ class AllSchedules:
 	def reachBestSchedule(self):
 		self.sortSchedulesList()
 		while True:
-			print(self.Calcfitness(self.schedules[0]))
 			self.crossOver()
 			if int(random.random()*100)%50 == 1:
 				self.mutation()
 			self.sortSchedulesList()
 			self.trimPopulation()
-			#self.printInfo()
+			self.printInfo()
 			if self.Calcfitness(self.schedules[0])>0:
 				break
 		self.schedules[0].printOutput()
@@ -215,7 +245,7 @@ class AllSchedules:
 
 	def printInfo(self):
 		print("All Plans:")
-		for i in range(self.count):
+		for i in range(len(self.schedules)):
 			self.schedules[i].printPlan()
 
 class Professor:
