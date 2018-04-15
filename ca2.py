@@ -63,10 +63,10 @@ class Schedule:
 
 	def putInRandomPossiblePlace(self, index):
 		try_times = 0
-		while try_times<10:
+		while try_times<20:
 			day_ = int((random.random())*100)%(self.days)
 			timeSlot_ = int((random.random())*100)%(self.timeSlots)
-			if hasConflict(index, self.courses[day_][timeSlot_])==False:
+			if self.hasConflict(index, self.plan[day_][timeSlot_])==False:
 				self.plan[day_][timeSlot_].append(self.courses[index])
 				return 1
 			try_times +=1
