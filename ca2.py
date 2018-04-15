@@ -86,10 +86,10 @@ class Schedule:
 			del self.courses[index]
 
 	def fitness(self ,happiness = [] , sadness = []):
-		for d in plan:
+		for d in self.plan:
 			for t in d:
 				for nc in t:
-					self.sumHappiness += happiness[nc]
+					self.sumHappiness += int(happiness[nc])
 					for nr in t:
 						if nr!=nc:
 							self.sumSadness += sadness[nc][nr]
