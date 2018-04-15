@@ -7,7 +7,17 @@ def convertListToInt(li):
 	for x in li:
 		newli.append(int(x))
 	return newli
-	
+
+class Course:
+	def __init__(self, courseId, prof):
+		self.courseId = courseId
+		self.prof = prof
+
+	def getProf(self):
+		return self.prof
+
+	def getCourseId(self):
+		return self.courseId
 
 class Schedule:
 	def __init__(self, days, timeSlots, courses=[]):
@@ -29,23 +39,45 @@ class Schedule:
 		for day_ in range(len(self.plan)):
 			for timeSlot_ in range(len(self.plan[0])):
 				if self.plan[day_][timeSlot_]==[-1]:
-					self.plan[day_][timeSlot_][0] = self.courses[index]
+					self.plan[day_][timeSlot_][0] = self.courses[index].getCourseId()
 					return 1
 		return -1
 
-	# def putInFirtPossiblePlace(self, index):
-	# 	for day_ in range(len(self.plan)):
-	# 		for timeSlot_ in range(len(self.plan[0])):
-	# 			if weHaveSameProf2Class()==False:
+
+	def hasConflict(self, index, courseList = []):
+		for item in courseList:
+			if item.getProf() == self.courses[index].getProf():
+				return True
+		return False 
+
+
+	def putInRandomPossiblePlace(self, index):
+		try_times = 0
+		while try_times<10:
+			day_ = int((random.random())*100)%(self.days)
+			timeSlot_ = int((random.random())*100)%(self.timeSlots)
+			if hasConflict(index, self.courses[day_][timeSlot_])==False:
+				self.courses[day_][timeSlot_].append(self.courses[index].getCourseId())
+				return 1
+			try_times +=1
+
+		return -1 
+			
 
 	def createPlan(self):
 		while len(self.courses)>0:
 			index = int((random.random())*100)%(len(self.courses))
 			emptySpace = self.PlaceInFirstEmptySpace(index)
 			if emptySpace==-1:
-				emptySpace = self.putInFirtPossiblePlace(index)
+				break
 			del self.courses[index]
 
+		while len(self.courses)>0:
+			index = int((random.random())*100)%(len(self.courses))
+			emptySpace = self.putInRandomPossiblePlace(index)
+			if emptySpace==-1:
+				print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester") 
+			del self.courses[index]
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
@@ -126,13 +158,15 @@ class University:
 
 		self.makeAllCourses()
 
-	def makeAllCourses(self):		
+	def makeAllCourses(self):
+		profID = -1;		
 		for profCourse in self.courses_by_profs:
+			profID +=1
 			if len(profCourse)>1:
 				for course in profCourse:
-					self.all_courses.append(course)
+					self.all_courses.append(Course(course, profID))
 			else:
-				self.all_courses.append(profCourse[0])
+				self.all_courses.append(Course(profCourse[0], profID))
 
 	def createPopulation(self):
 		self.schedules = AllSchedules(NUMBER_OF_SCHEDULES , self.DAY_SLOT, self.TIME_SLOT, self.all_courses)
