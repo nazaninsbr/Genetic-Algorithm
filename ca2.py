@@ -31,6 +31,12 @@ class Schedule:
 		self.courses = courses[:]
 		self.makeEmptyPlan()
 		self.createPlan()
+	
+	def gettimeSlots(self):
+		return self.timeSlots
+	
+	def getdays(self):
+		return self.days
 
 	def makeEmptyPlan(self):		
 		for _ in range(self.days):
@@ -96,18 +102,29 @@ class Schedule:
 		totalFitness = sumHappiness - sumSadness 
 
 	def printOutput():
-		for item in self.courses:
-			print "[" + item.getCourseId + "]" + "[" + item.getProf + "]" + "[" +
+		for i in range(0 , len(plan)):
+			for j in range(i , len(plan)):
+				for k in range(0 , len(self.courses)):
+					print "[" + self.plan[i][j].courses[k].getCourseId() + "]" + "[" + self.plan[i][j].courses[k].getProf() + "]" + "[" + self.plan[i][j].getDayAndTime()+"]"
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
 
+	def printOutput(self):
+		self.printPlan()
 
 	def getPlan(self):
 		return self.plan
 
 	def getDayAndTime(self, dayRand1, timeRand1):
 		return self.plan[dayRand1][timeRand1]
+
+	def setPlan(self, plan):
+		self.plan = plan
+
+	def changedDateAndTime(self, value, day, time):
+		temp = self.plan[day][time]
+		self.plan[day][time] = value 
 
 
 class AllSchedules:
@@ -142,40 +159,64 @@ class AllSchedules:
 				if self.Calcfitness(self.schedules[plan1index]) < self.Calcfitness(self.schedules[plan2index]):
 					self.swapSchedules(plan1index, plan2index)
 
+	def createNewPlan(self, plan, changedValue, day, time):
+		newPlan = Schedule(self.days, self.timeSlots, self.courses)
+		newPlan.setPlan(plan)
+		newPlan.changedDateAndTime(changedValue, day, time)
+		self.schedules.append(newPlan)
+
 	def crossOver(self):
+		#print("here")
 		for plan1 in self.schedules:
 			if int(random.random()*100)%10 == 1 and len(self.schedules)>4:
 				plan2index = int(random.random()*100)%4
+				#print(plan2index)
 			else:
 				plan2index = int(random.random()*100)%(len(self.schedules))
+				#print(plan2index)
 
 			dayRand1 = int(random.random()*100)%self.days
 			dayRand2 = int(random.random()*100)%self.days
 			timeRand1 = int(random.random()*100)%self.timeSlots
 			timeRand2 = int(random.random()*100)%self.timeSlots
 
-			dayAndTime1 = plan.getDayAndTime(dayRand1, timeRand1)
+			dayAndTime1 = plan1.getDayAndTime(dayRand1, timeRand1)
 			dayAndTime2 = self.schedules[plan2index].getDayAndTime(dayRand2, timeRand2)
-
-			self.createNewPlan()
+			self.createNewPlan(plan1.getPlan(), dayAndTime1, dayRand1, timeRand1)
+			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime2, dayRand2, timeRand2)
 
 	def mutation(self):
 		pass
 
 
+	def trimPopulation(self):
+		while len(self.schedules)>100:
+			del self.schedules[-1]
+
+
+
 	def reachBestSchedule(self):
 		self.sortSchedulesList()
-		while self.Calcfitness(self.schedules[0]) <0:
+		while True:
+			print(self.Calcfitness(self.schedules[0]))
 			self.crossOver()
 			if int(random.random()*100)%50 == 1:
 				self.mutation()
 			self.sortSchedulesList()
+<<<<<<< HEAD
 			self.printInfo()
 <<<<<<< HEAD
 =======
 
 		
+=======
+			self.trimPopulation()
+			#self.printInfo()
+			if self.Calcfitness(self.schedules[0])>0:
+				break
+>>>>>>> 62f0f6d24f9f171b61d7df5dbff60c0582dbe81e
 
+		self.schedules[0].printOutput()
 
 >>>>>>> 5bdce025807388ee4e38c51a327e7fe05649c3df
 
