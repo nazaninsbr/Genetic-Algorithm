@@ -24,6 +24,10 @@ class Schedule:
 		self.plan = []
 		self.days = days
 		self.timeSlots = timeSlots
+		self.sumHappiness = 0
+		self.sumSadness = 0
+		# self.happiness = happiness
+		# self.sadness = sadness
 		self.courses = courses[:]
 		self.makeEmptyPlan()
 		self.createPlan()
@@ -70,17 +74,27 @@ class Schedule:
 			emptySpace = self.PlaceInFirstEmptySpace(index)
 			if emptySpace==-1:
 				break
+			#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
 			del self.courses[index]
-
 		while len(self.courses)>0:
 			index = int((random.random())*100)%(len(self.courses))
 			emptySpace = self.putInRandomPossiblePlace(index)
 			if emptySpace==-1:
-				print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester") 
+				print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester")
+			# else:
+				#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
 			del self.courses[index]
 
 	def fitness(self ,happiness = [] , sadness = []):
-		pass
+		for d in plan:
+			for t in d:
+				for nc in t:
+					self.sumHappiness += happiness[nc]
+					for nr in t:
+						if nr!=nc:
+							self.sumSadness += sadness[nc][nr]
+		totalFitness = sumHappiness - sumSadness
+
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
