@@ -93,8 +93,7 @@ class Schedule:
 					for nr in t:
 						if nr!=nc:
 							self.sumSadness += sadness[nc][nr]
-		totalFitness = sumHappiness - sumSadness
-
+		totalFitness = sumHappiness - sumSadness 
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
@@ -147,9 +146,6 @@ class AllSchedules:
 			if int(random.random()*100)%50 == 1:
 				self.mutation()
 			self.printInfo()
-		
-
-
 
 	def printInfo(self):
 		print("All Plans:")
