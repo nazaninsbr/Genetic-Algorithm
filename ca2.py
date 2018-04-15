@@ -92,20 +92,23 @@ class Schedule:
 			del self.courses[index]
 
 	def fitness(self ,happiness = [] , sadness = []):
+		self.sumHappiness = 0
+		self.sumSadness = 0
 		for d in self.plan:
 			for t in d:
 				for nc in t:
-					self.sumHappiness += int(happiness[nc.getCourseId])
+					self.sumHappiness += int(happiness[nc.getCourseId()-1])
 					for nr in t:
-						if nr!=nc:
-							self.sumSadness += sadness[nc.getCourseId][nr.getCourseId]
-		totalFitness = sumHappiness - sumSadness 
+						if nr.getCourseId() != nc.getCourseId():
+							self.sumSadness += int(sadness[nc.getCourseId()-1][nr.getCourseId()-1])
+		totalFitness = self.sumHappiness - self.sumSadness 
+		return totalFitness
 
 	def printOutput():
 		for i in range(0 , len(plan)):
 			for j in range(i , len(plan)):
 				for k in range(0 , len(self.courses)):
-					print "[" + self.plan[i][j].courses[k].getCourseId() + "]" + "[" + self.plan[i][j].courses[k].getProf() + "]" + "[" + self.plan[i][j].getDayAndTime()+"]"
+					print("[" + self.plan[i][j].courses[k].getCourseId() + "]" + "[" + self.plan[i][j].courses[k].getProf() + "]" + "[" + self.plan[i][j].getDayAndTime()+"]")
 
 	def printPlan(self):
 		print("Plan: {}".format(self.plan))
@@ -186,7 +189,7 @@ class AllSchedules:
 			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime2, dayRand2, timeRand2)
 
 	def mutation(self):
-		pass
+		return 0
 
 
 	def trimPopulation(self):
@@ -203,22 +206,12 @@ class AllSchedules:
 			if int(random.random()*100)%50 == 1:
 				self.mutation()
 			self.sortSchedulesList()
-<<<<<<< HEAD
-			self.printInfo()
-<<<<<<< HEAD
-=======
-
-		
-=======
 			self.trimPopulation()
 			#self.printInfo()
 			if self.Calcfitness(self.schedules[0])>0:
 				break
->>>>>>> 62f0f6d24f9f171b61d7df5dbff60c0582dbe81e
-
 		self.schedules[0].printOutput()
 
->>>>>>> 5bdce025807388ee4e38c51a327e7fe05649c3df
 
 	def printInfo(self):
 		print("All Plans:")
