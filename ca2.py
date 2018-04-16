@@ -260,7 +260,7 @@ class AllSchedules:
 	def calcExpectedVal(self):
 		temp = self.courses[:]
 		self.sortCourses(temp)
-		for i in range(int(self.days*self.timeSlots*9/10)):
+		for i in range(int(self.days*self.timeSlots*4/5)):
 			self.expectedVal += int(self.happiness[temp[i].getCourseId()-1])
 
 	def reachBestSchedule(self):
