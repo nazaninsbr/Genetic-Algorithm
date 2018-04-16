@@ -1,6 +1,6 @@
 import random 
 
-NUMBER_OF_SCHEDULES = 20
+NUMBER_OF_SCHEDULES = 100
 
 def convertListToInt(li):
 	newli = []
@@ -42,13 +42,13 @@ class Schedule:
 		for _ in range(self.days):
 			line = []
 			for _ in range(self.timeSlots):
-				line.append([-1])
+				line.append([Course(-1, -1)])
 			self.plan.append(line)
 
 	def PlaceInFirstEmptySpace(self, index):
 		for day_ in range(len(self.plan)):
 			for timeSlot_ in range(len(self.plan[0])):
-				if self.plan[day_][timeSlot_]==[-1]:
+				if self.plan[day_][timeSlot_][0].getCourseId()==-1:
 					self.plan[day_][timeSlot_][0] = self.courses[index]
 					return 1
 		return -1
@@ -85,11 +85,12 @@ class Schedule:
 		while len(self.courses)>0:
 			index = int((random.random())*100)%(len(self.courses))
 			emptySpace = self.putInRandomPossiblePlace(index)
-			if emptySpace==-1:
-				print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester")
+			# if emptySpace==-1:
+			# 	print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester")
 			# else:
 				#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
 			del self.courses[index]
+
 
 	def fitness(self ,happiness = [] , sadness = []):
 		self.sumHappiness = 0
@@ -97,10 +98,10 @@ class Schedule:
 		for d in self.plan:
 			for t in d:
 				for nc in t:
-					if nc != -1:
+					if nc.getCourseId() != -1:
 						self.sumHappiness += int(happiness[nc.getCourseId()-1])
 						for nr in t:
-							if nr != -1:
+							if nr.getCourseId() != -1:
 								if nr.getCourseId() != nc.getCourseId():
 									self.sumSadness += int(sadness[nc.getCourseId()-1][nr.getCourseId()-1])
 		totalFitness = self.sumHappiness - self.sumSadness 
@@ -111,7 +112,7 @@ class Schedule:
 		for day in range(len(self.plan)):
 			for time in range(len(self.plan[day])):
 				for course in range(len(self.plan[day][time])):
-					if self.plan[day][time][course] != -1:
+					if self.plan[day][time][course].getCourseId() != -1:
 						print("["+str(time+1)+"]"+"["+ str(day+1) + "]" + "[" + str(self.plan[day][time][course].getProf())+"]"+"[" + str(self.plan[day][time][course].getCourseId())+"]")
 
 	def printPlan(self):
@@ -144,11 +145,11 @@ class Schedule:
 				if day == changedDay and time == changedTime:
 					continue 
 				for course in range(len(self.plan[day][time])):
-					if self.plan[day][time][course] != -1:
+					if self.plan[day][time][course].getCourseId() != -1:
 						for item in self.plan[changedDay][changedTime]:
-							if item != -1:
+							if item.getCourseId() != -1:
 								if self.plan[day][time][course].getCourseId() == item.getCourseId():
-									del self.plan[day][time][course]
+									self.plan[day][time][course] = Course(-1, -1)
 
 
 
@@ -156,6 +157,15 @@ class Schedule:
 		temp = self.plan[day][time]
 		self.plan[day][time] = value 
 		self.FixDuplicate(day, time)
+
+	def mutate(self):
+		dayRand = int(random.random()*100)%self.days
+		timeRand = int(random.random()*100)%self.timeSlots
+		courseRand = int(random.random()*100)%(len(self.plan[dayRand][timeRand]))
+		thisCourse = self.plan[dayRand][timeRand][courseRand]
+		del self.plan[dayRand][timeRand][courseRand]
+		self.courses.append(thisCourse)
+		self.putInRandomPossiblePlace(0)
 
 
 class AllSchedules:
@@ -167,6 +177,8 @@ class AllSchedules:
 		self.days = days
 		self.timeSlots = timeSlots
 		self.courses = courses
+		self.expectedVal = 0
+		self.calcExpectedVal()
 
 	def createSchedules(self):
 		for i in range(self.count):
@@ -217,29 +229,54 @@ class AllSchedules:
 			self.createNewPlan(plan1.getPlan(), dayAndTime1, dayRand1, timeRand1)
 			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime2, dayRand2, timeRand2)
 
-		print(len(self.schedules))
+
+	def createNewPlanWithMutation(self, plan):
+		newPlan = Schedule(self.days, self.timeSlots, [])
+		newPlan.setPlan(plan)
+		newPlan.mutate()
+		self.schedules.append(newPlan)
 
 	def mutation(self):
-		return 0
+		print("mutating")
+		planindex = int(random.random()*100)%(len(self.schedules))
+		thisplan = self.schedules[planindex].getPlan()
+		self.createNewPlanWithMutation(thisplan)
+
 
 
 	def trimPopulation(self):
-		while len(self.schedules)>200:
+		while len(self.schedules)>300:
 			del self.schedules[-1]
 
+	def sortCourses(self, temp):
+		for i in range(len(temp)):
+			for j in range(i):
+				if self.happiness[temp[i].getCourseId()-1] > self.happiness[temp[j].getCourseId()-1]:
+					tempTemp = temp[i]
+					temp[i] = temp[j]
+					temp[j] = tempTemp
 
+
+	def calcExpectedVal(self):
+		temp = self.courses[:]
+		self.sortCourses(temp)
+		for i in range(int(self.days*self.timeSlots*7/8)):
+			self.expectedVal += int(self.happiness[temp[i].getCourseId()-1])
 
 	def reachBestSchedule(self):
 		self.sortSchedulesList()
 		while True:
+			print("Min Expected: "+str(self.expectedVal))
+			print("Number: "+str(len(self.schedules)))
+			print("Max: "+str(self.Calcfitness(self.schedules[0])))
+			if self.Calcfitness(self.schedules[0])>self.expectedVal:
+				break
 			self.crossOver()
 			if int(random.random()*100)%50 == 1:
 				self.mutation()
 			self.sortSchedulesList()
 			self.trimPopulation()
-			self.printInfo()
-			if self.Calcfitness(self.schedules[0])>0:
-				break
+			
 		self.schedules[0].printOutput()
 
 
@@ -334,7 +371,13 @@ def mainFunc():
 	uni.createPopulation()
 
 if __name__ == '__main__':
+	import time
+	now = time.time()
 	mainFunc()
+	later = time.time()
+	difference = int(later - now)
+	print("Time: "+str(difference))
+	
 
 
 
