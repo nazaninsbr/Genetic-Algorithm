@@ -1,6 +1,6 @@
 import random 
 
-NUMBER_OF_SCHEDULES = 100
+NUMBER_OF_SCHEDULES = 200
 
 def convertListToInt(li):
 	newli = []
@@ -75,20 +75,26 @@ class Schedule:
 			
 
 	def createPlan(self):
+		li = []
 		while len(self.courses)>0:
 			index = int((random.random())*100)%(len(self.courses))
-			emptySpace = self.PlaceInFirstEmptySpace(index)
-			if emptySpace==-1:
-				break
+			if (self.courses[index].getCourseId() in li)==False:
+				emptySpace = self.PlaceInFirstEmptySpace(index)
+				if emptySpace==-1:
+					break
+				li.append(self.courses[index].getCourseId())
 			#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
 			del self.courses[index]
 		while len(self.courses)>0:
 			index = int((random.random())*100)%(len(self.courses))
-			emptySpace = self.putInRandomPossiblePlace(index)
-			# if emptySpace==-1:
-			# 	print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester")
-			# else:
-				#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
+			if (self.courses[index].getCourseId() in li)==False:
+				emptySpace = self.putInRandomPossiblePlace(index)
+				if emptySpace==-1:
+					print("Can't Have Course "+str(self.courses[index].getCourseId())+" This Semester")
+				else:
+					li.append(self.courses[index].getCourseId())
+				# else:
+					#self.sumHappiness += self.happiness[self.courses[index].getCourseId()-1]
 			del self.courses[index]
 
 
@@ -159,9 +165,12 @@ class Schedule:
 		self.FixDuplicate(day, time)
 
 	def mutate(self):
-		dayRand = int(random.random()*100)%self.days
-		timeRand = int(random.random()*100)%self.timeSlots
-		courseRand = int(random.random()*100)%(len(self.plan[dayRand][timeRand]))
+		while True:	
+			dayRand = int(random.random()*100)%self.days
+			timeRand = int(random.random()*100)%self.timeSlots
+			if len(self.plan[dayRand][timeRand])>0:
+				courseRand = int(random.random()*100)%(len(self.plan[dayRand][timeRand]))
+				break
 		thisCourse = self.plan[dayRand][timeRand][courseRand]
 		del self.plan[dayRand][timeRand][courseRand]
 		self.courses.append(thisCourse)
@@ -245,7 +254,7 @@ class AllSchedules:
 
 
 	def trimPopulation(self):
-		while len(self.schedules)>200:
+		while len(self.schedules)>400:
 			del self.schedules[-1]
 
 	def sortCourses(self, temp):
@@ -260,25 +269,26 @@ class AllSchedules:
 	def calcExpectedVal(self):
 		temp = self.courses[:]
 		self.sortCourses(temp)
-		for i in range(int(self.days*self.timeSlots*4/5)):
+		for i in range(int(self.days*self.timeSlots)):
 			self.expectedVal += int(self.happiness[temp[i].getCourseId()-1])
 
 	def reachBestSchedule(self):
+		prevMax = 0
 		numberOfGenerations = 10
 		self.sortSchedulesList()
 		while True:
 			numberOfGenerations -= 1
 			print("Min Expected: "+str(self.expectedVal))
 			print("Max: "+str(self.Calcfitness(self.schedules[0])))
-			if self.Calcfitness(self.schedules[0])>self.expectedVal:
+			newMax = self.Calcfitness(self.schedules[0])
+			if newMax>self.expectedVal or numberOfGenerations==0 or abs(newMax-prevMax)<50:
 				break
+			prevMax = newMax
 			self.crossOver()
 			if int(random.random()*100)%2 == 1:
 				self.mutation()
 			self.sortSchedulesList()
 			self.trimPopulation()
-			if numberOfGenerations == 0:
-				break
 			
 		self.schedules[0].printOutput()
 
