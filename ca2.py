@@ -1,6 +1,8 @@
 import random 
 
 NUMBER_OF_SCHEDULES = 200
+NUMBER_OF_GENERATIONS = 10
+MAX_NUMBER_OF_SCHEDULES = 400
 
 def convertListToInt(li):
 	newli = []
@@ -254,7 +256,7 @@ class AllSchedules:
 
 
 	def trimPopulation(self):
-		while len(self.schedules)>400:
+		while len(self.schedules)>MAX_NUMBER_OF_SCHEDULES:
 			del self.schedules[-1]
 
 	def sortCourses(self, temp):
@@ -274,7 +276,7 @@ class AllSchedules:
 
 	def reachBestSchedule(self):
 		prevMax = 0
-		numberOfGenerations = 10
+		numberOfGenerations = NUMBER_OF_GENERATIONS
 		self.sortSchedulesList()
 		while True:
 			numberOfGenerations -= 1
