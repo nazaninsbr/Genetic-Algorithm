@@ -245,7 +245,7 @@ class AllSchedules:
 
 
 	def trimPopulation(self):
-		while len(self.schedules)>300:
+		while len(self.schedules)>200:
 			del self.schedules[-1]
 
 	def sortCourses(self, temp):
@@ -260,22 +260,25 @@ class AllSchedules:
 	def calcExpectedVal(self):
 		temp = self.courses[:]
 		self.sortCourses(temp)
-		for i in range(int(self.days*self.timeSlots*7/8)):
+		for i in range(int(self.days*self.timeSlots*9/10)):
 			self.expectedVal += int(self.happiness[temp[i].getCourseId()-1])
 
 	def reachBestSchedule(self):
+		numberOfGenerations = 10
 		self.sortSchedulesList()
 		while True:
+			numberOfGenerations -= 1
 			print("Min Expected: "+str(self.expectedVal))
-			print("Number: "+str(len(self.schedules)))
 			print("Max: "+str(self.Calcfitness(self.schedules[0])))
 			if self.Calcfitness(self.schedules[0])>self.expectedVal:
 				break
 			self.crossOver()
-			if int(random.random()*100)%50 == 1:
+			if int(random.random()*100)%2 == 1:
 				self.mutation()
 			self.sortSchedulesList()
 			self.trimPopulation()
+			if numberOfGenerations == 0:
+				break
 			
 		self.schedules[0].printOutput()
 
@@ -348,8 +351,10 @@ class University:
 			if len(profCourse)>1:
 				for course in profCourse:
 					self.all_courses.append(Course(course, profID))
-			else:
+			elif len(profCourse)==1:
 				self.all_courses.append(Course(profCourse[0], profID))
+			else:
+				continue
 
 	def createPopulation(self):
 		self.schedules = AllSchedules(NUMBER_OF_SCHEDULES , self.DAY_SLOT, self.TIME_SLOT, self.all_courses, self.valueofHappiness, self.sadness)
@@ -376,7 +381,7 @@ if __name__ == '__main__':
 	mainFunc()
 	later = time.time()
 	difference = int(later - now)
-	print("Time: "+str(difference))
+	print("Time: "+str(difference)+" Seconds")
 	
 
 
