@@ -152,26 +152,35 @@ class Schedule:
 
 
 	def FixDuplicate(self, value, changedPart):
-		addedCourses = []
-		for day in value:
+		# addedCourses = []
+		# for day in value:
+		# 	for time in day:
+		# 		for course in time:
+		# 			addedCourses.append(course.getCourseId())
+		# print(addedCourses)
+		# if changedPart == 0:
+		# 	for day in self.plan[len(value)-1:]:
+		# 		for time in day:
+		# 			for course in time:
+		# 				if course.getCourseId() != -1:
+		# 					if course.getCourseId() in addedCourses:
+		# 						course = Course(-1, -1)
+		# else:
+		# 	for day in self.plan[:len(value)]:
+		# 		for time in day:
+		# 			for course in time:
+		# 				if course.getCourseId() != -1:
+		# 					if course.getCourseId() in addedCourses:
+		# 						course = Course(-1, -1)
+		seenCourses = []
+		for day in self.plan:
 			for time in day:
 				for course in time:
-					addedCourses.append(course.getCourseId())
-		print(addedCourses)
-		if changedPart == 0:
-			for day in self.plan[len(value)-1:]:
-				for time in day:
-					for course in time:
-						if course.getCourseId() != -1:
-							if course.getCourseId() in addedCourses:
-								course = Course(-1, -1)
-		else:
-			for day in self.plan[:len(value)]:
-				for time in day:
-					for course in time:
-						if course.getCourseId() != -1:
-							if course.getCourseId() in addedCourses:
-								course = Course(-1, -1)
+					if course.getCourseId() != -1:
+						if course.getCourseId() in seenCourses:
+							course = Course(-1, -1)
+						else:
+							seenCourses.append(course.getCourseId())
 
 
 
