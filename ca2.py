@@ -193,6 +193,7 @@ class AllSchedules:
 
 	def createSchedules(self):
 		for i in range(self.count):
+			print("Plan: "+str(i))
 			sch = Schedule(self.days, self.timeSlots, self.courses)
 			self.schedules.append(sch)
 
@@ -284,6 +285,7 @@ class AllSchedules:
 			print("Max: "+str(self.Calcfitness(self.schedules[0])))
 			newMax = self.Calcfitness(self.schedules[0])
 			if newMax>self.expectedVal or numberOfGenerations==0 or abs(newMax-prevMax)<50:
+			#if numberOfGenerations==0 or abs(newMax-prevMax)<50:
 				break
 			prevMax = newMax
 			self.crossOver()
