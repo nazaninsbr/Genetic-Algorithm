@@ -148,7 +148,7 @@ class Schedule:
 		return self.plan[dayRand1][timeRand1]
 
 	def setPlan(self, plan):
-		self.plan = plan
+		self.plan = plan[:]
 
 
 	def FixDuplicate(self, value, changedPart):
@@ -157,8 +157,9 @@ class Schedule:
 			for time in day:
 				for course in time:
 					addedCourses.append(course.getCourseId())
+		print(addedCourses)
 		if changedPart == 0:
-			for day in self.plan[len(value):]:
+			for day in self.plan[len(value)-1:]:
 				for time in day:
 					for course in time:
 						if course.getCourseId() != -1:
@@ -181,11 +182,11 @@ class Schedule:
 			self.plan[0:size] = value[:]
 		else:
 			size = len(value)
-			self.plan[-1*size:] = value[:]
+			self.plan[len(self.plan)-size:] = value[:]
 		#temp = self.plan[day][time]
 		#self.plan[day][time] = value 
 		self.FixDuplicate(value, changedPart)
-		#self.printPlan()
+		self.printPlan()
 
 	def mutate(self):
 		for _ in range(self.days*self.timeSlots):
@@ -274,7 +275,7 @@ class AllSchedules:
 			dayAndTime2 = self.schedules[plan2index].afterDay(midDay)
 			self.createNewPlan(plan1.getPlan(), dayAndTime2)
 			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime1)
-			print(str(self.Calcfitness(self.schedules[0])))
+			# print(str(self.Calcfitness(self.schedules[0])))
 
 
 	def createNewPlanWithMutation(self, plan):
