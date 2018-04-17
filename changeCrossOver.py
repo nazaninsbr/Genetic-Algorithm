@@ -1,5 +1,6 @@
 import random 
 import time
+import copy
 
 NUMBER_OF_SCHEDULES = 100
 NUMBER_OF_GENERATIONS = 10
@@ -148,10 +149,10 @@ class Schedule:
 		return self.plan[dayRand1][timeRand1]
 
 	def setPlan(self, plan):
-		self.plan = plan[:]
+		self.plan = copy.deepcopy(plan)
 
 
-	def FixDuplicate(self, value, changedPart):
+	def FixDuplicate(self):
 		# addedCourses = []
 		# for day in value:
 		# 	for time in day:
@@ -173,14 +174,14 @@ class Schedule:
 		# 					if course.getCourseId() in addedCourses:
 		# 						course = Course(-1, -1)
 		seenCourses = []
-		for day in self.plan:
-			for time in day:
-				for course in time:
-					if course.getCourseId() != -1:
-						if course.getCourseId() in seenCourses:
-							course = Course(-1, -1)
+		for day in range(len(self.plan)):
+			for time in range(len(self.plan[day])):
+				for course in range(len(self.plan[day][time])):
+					if self.plan[day][time][course].getCourseId() != -1:
+						if self.plan[day][time][course].getCourseId() in seenCourses:
+							self.plan[day][time][course] = Course(-1, -1)
 						else:
-							seenCourses.append(course.getCourseId())
+							seenCourses.append(self.plan[day][time][course].getCourseId())
 
 
 
@@ -188,13 +189,13 @@ class Schedule:
 		changedPart = int(random.random()*100)%2
 		if changedPart==0:
 			size = len(value)
-			self.plan[0:size] = value[:]
+			self.plan[0:size] = copy.deepcopy(value) 
 		else:
 			size = len(value)
-			self.plan[len(self.plan)-size:] = value[:]
+			self.plan[len(self.plan)-size:] = copy.deepcopy(value)
 		#temp = self.plan[day][time]
 		#self.plan[day][time] = value 
-		self.FixDuplicate(value, changedPart)
+		self.FixDuplicate()
 
 	def mutate(self):
 		for _ in range(self.days*self.timeSlots):
@@ -260,13 +261,14 @@ class AllSchedules:
 		# 	print(self.Calcfitness(plan))
 
 	def createNewPlan(self, plan, changedValue):
+		thisPlan = plan[:]
 		newPlan = Schedule(self.days, self.timeSlots, [])
-		newPlan.setPlan(plan)
+		newPlan.setPlan(thisPlan)
 		newPlan.changedDateAndTime(changedValue)
 		self.schedules.append(newPlan)
 
 	def crossOver(self):
-		print("crossover")
+		# print("crossover")
 		#print("here")
 		expert = self.schedules[0:20]
 		for plan1 in expert:
@@ -279,11 +281,12 @@ class AllSchedules:
 
 			midDay = int(self.days/2)
 
-			dayAndTime1 = plan1.beforeDay(midDay)
-			dayAndTime2 = self.schedules[plan2index].afterDay(midDay)
+			dayAndTime1 = plan1.beforeDay(midDay)[:]
+			dayAndTime2 = self.schedules[plan2index].afterDay(midDay)[:]
 			self.createNewPlan(plan1.getPlan(), dayAndTime2)
 			self.createNewPlan(self.schedules[plan2index].getPlan(), dayAndTime1)
-			# print(str(self.Calcfitness(self.schedules[0])))
+
+			# print(self.Calcfitness(self.schedules[0]))
 
 
 	def createNewPlanWithMutation(self, plan):
@@ -293,10 +296,11 @@ class AllSchedules:
 		self.schedules.append(newPlan)
 
 	def mutation(self):
-		#print('mutating')
+		print('mutating')
 		planindex = int(random.random()*100)%(int(len(self.schedules)/2))
-		thisplan = self.schedules[planindex+20].getPlan()
-		self.createNewPlanWithMutation(thisplan)
+		if planindex+20<len(self.schedules):
+			thisplan = self.schedules[planindex+20].getPlan()
+			self.createNewPlanWithMutation(thisplan)
 
 
 
@@ -334,9 +338,9 @@ class AllSchedules:
 				break
 			prevMax = newMax
 			self.crossOver()
+			self.sortSchedulesList()
 			if int(random.random()*100)%2 == 1:
 				self.mutation()
-			self.sortSchedulesList()
 			self.trimPopulation()
 			later = time.time()
 			difference = int(later - now)
@@ -443,3 +447,4 @@ if __name__ == '__main__':
 	later = time.time()
 	difference = int(later - now)
 	print("Total Time: "+str(difference)+" Seconds")
+
