@@ -195,7 +195,6 @@ class Schedule:
 		#temp = self.plan[day][time]
 		#self.plan[day][time] = value 
 		self.FixDuplicate(value, changedPart)
-		self.printPlan()
 
 	def mutate(self):
 		for _ in range(self.days*self.timeSlots):
