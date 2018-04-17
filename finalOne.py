@@ -106,13 +106,13 @@ class Schedule:
 		self.sumSadness = 0
 		for d in self.plan:
 			for t in d:
-				for nc in t:
-					if nc.getCourseId() != -1:
-						self.sumHappiness += int(happiness[nc.getCourseId()-1])
-						for nr in t:
-							if nr.getCourseId() != -1:
-								if nr.getCourseId() != nc.getCourseId():
-									self.sumSadness += int(sadness[nc.getCourseId()-1][nr.getCourseId()-1])
+				for ncindex in range(len(t)):
+					if t[ncindex].getCourseId() != -1:
+						self.sumHappiness += int(happiness[t[ncindex].getCourseId()-1])
+						for nrindex in range(ncindex+1, len(t)):
+							if t[nrindex].getCourseId() != -1:
+								if t[nrindex].getCourseId() != t[ncindex].getCourseId():
+									self.sumSadness += int(sadness[t[ncindex].getCourseId()-1][t[nrindex].getCourseId()-1])
 		totalFitness = self.sumHappiness - self.sumSadness 
 		return totalFitness
 
@@ -171,16 +171,17 @@ class Schedule:
 		self.FixDuplicate(day, time)
 
 	def mutate(self):
-		while True:	
-			dayRand = int(random.random()*100)%self.days
-			timeRand = int(random.random()*100)%self.timeSlots
-			if len(self.plan[dayRand][timeRand])>0:
-				courseRand = int(random.random()*100)%(len(self.plan[dayRand][timeRand]))
-				break
-		thisCourse = self.plan[dayRand][timeRand][courseRand]
-		del self.plan[dayRand][timeRand][courseRand]
-		self.courses.append(thisCourse)
-		self.putInRandomPossiblePlace(0)
+		for _ in range(self.days*self.timeSlots):
+			while True:	
+				dayRand = int(random.random()*100)%self.days
+				timeRand = int(random.random()*100)%self.timeSlots
+				if len(self.plan[dayRand][timeRand])>0:
+					courseRand = int(random.random()*100)%(len(self.plan[dayRand][timeRand]))
+					break
+			thisCourse = self.plan[dayRand][timeRand][courseRand]
+			del self.plan[dayRand][timeRand][courseRand]
+			self.courses.append(thisCourse)
+			self.putInRandomPossiblePlace(0)
 
 
 class AllSchedules:
@@ -219,7 +220,7 @@ class AllSchedules:
 	def sortSchedulesList(self):		
 		for plan1index in range(len(self.schedules)):
 			for plan2index in range(0, plan1index):
-				if self.Calcfitness(self.schedules[plan1index]) < self.Calcfitness(self.schedules[plan2index]):
+				if self.Calcfitness(self.schedules[plan1index]) > self.Calcfitness(self.schedules[plan2index]):
 					self.swapSchedules(plan1index, plan2index)
 
 	def createNewPlan(self, plan, changedValue, day, time):
@@ -406,7 +407,3 @@ if __name__ == '__main__':
 	difference = int(later - now)
 	print("Total Time: "+str(difference)+" Seconds")
 	
-
-
-
-
